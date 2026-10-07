@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#202d3d">
+  <title>Do‘kon boshqaruvi</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <h1 class="shop-name" id="shopName">Mening do‘konim</h1>
+    <span class="shop-sticker" id="shopSticker" aria-label="Do‘kon stikeri"></span>
+    <nav class="sidebar-nav" aria-label="Asosiy menyu">
+      <a class="nav-button" href="#dashboard">Bosh sahifa</a>
+      <a class="nav-button" href="#warehouse">Tovarlar</a>
+      <a class="nav-button active" href="#store">Sotuv</a>
+      <a class="nav-button" href="#debts">Qarzlar</a>
+      <a class="nav-button" href="#expenses">Xarajatlar</a>
+      <a class="nav-button" href="#summary">Hisobot</a>
+    </nav>
+    <button class="settings-button" id="settingsButton" type="button">Sozlamalar</button>
+  </aside>
+
+  <main class="content">
+    <section class="store-page" id="storePage">
+      <header class="page-header dashboard-header">
+        <div>
+          <p class="eyebrow">SAVDO</p>
+          <h2>Sotuv</h2>
+          <p class="store-intro">Tovar tanlang, savatni to‘ldiring va sotuvni yakunlang.</p>
+        </div>
+        <div class="datetime-card" aria-live="polite">
+          <strong id="currentTime"></strong>
+          <span id="currentDate"></span>
+        </div>
+      </header>
+
+      <section class="panel">
+        <h3>Yangi sotuv</h3>
+        <form class="store-form" id="saleForm">
+          <label>Qidirish
+            <input id="saleProductSearchInput" list="saleProductSuggestions" type="search" placeholder="Tovar nomi yoki shtrix-kod" autocomplete="off">
+            <datalist id="saleProductSuggestions"></datalist>
+          </label>
+          <label>Kategoriya
+            <select id="saleCategoryInput"><option value="">Barcha kategoriyalar</option></select>
+          </label>
+          <label>Tovar
+            <select id="saleProductInput" required><option value="">Tovarni tanlang</option></select>
+          </label>
+          <label>Miqdor
+            <input id="saleQuantityInput" type="number" min="1" step="1" required>
+          </label>
+          <label>Sotuv narxi (dona)
+            <input id="salePriceInput" type="number" min="0" step="1" required>
+            <span class="formatted-price" id="salePriceFormatted">Ko‘rinishi: 0 so‘m</span>
+          </label>
+          <p class="store-hint" id="saleCostHint">Tovar tanlang — tannarxi va do‘kondagi qoldiq shu yerda ko‘rinadi.</p>
+          <button class="secondary-button" id="addToCartButton" type="button">Savatga qo‘shish</button>
+          <section class="cart-panel" aria-labelledby="cartHeading">
+            <div class="section-heading">
+              <h4 id="cartHeading">Savat</h4>
+              <button class="clear-button" id="clearCartButton" type="button">Savatni bo‘shatish</button>
+            </div>
+            <ul class="product-list" id="saleCartList"></ul>
+            <p class="sale-total" id="saleTotal">Savat jami: 0 so‘m</p>
+          </section>
+          <label>To‘lov turi
+            <select id="salePaymentMethod">
+              <option value="cash">Naqd</option>
+              <option value="card">Karta</option>
+              <option value="credit">Nasiya</option>
+            </select>
+          </label>
+          <div class="credit-fields" id="saleCreditFields" hidden>
+            <label>Mijoz ismi<input id="saleCustomerName" type="text"></label>
+            <label>Telefon raqami<input id="saleCustomerPhone" type="tel"></label>
+            <label>Qaytarish muddati
+              <input id="saleCreditPeriod" type="number" min="1" step="1">
+            </label>
+            <label>Muddat birligi
+              <select id="saleCreditPeriodUnit"><option value="days">Kun</option><option value="months">Oy</option></select>
+            </label>
+            <p class="repayment-date-preview" id="saleDueDatePreview">Qaytarish sanasi: —</p>
+          </div>
+          <button class="primary-button checkout-button" id="checkoutButton" type="submit" disabled>Sotuvni yakunlash</button>
+        </form>
+      </section>
+
+      <details class="panel collapsible-panel">
+        <summary>Do‘kondagi qoldiq</summary>
+        <label class="inventory-search">Tovar qidirish
+          <input id="storeSearchInput" list="storeSearchSuggestions" type="search" placeholder="Nomi, rusumi yoki shtrix-kod">
+          <datalist id="storeSearchSuggestions"></datalist>
+        </label>
+        <ul class="product-list" id="storeProductsList"></ul>
+        <div class="panel-export-actions">
+          <button class="secondary-button" type="button" data-export-section="store-stock" data-export-format="excel">Excel</button>
+          <button class="secondary-button" type="button" data-export-section="store-stock" data-export-format="word">Word</button>
+          <button class="clear-button" type="button" data-clear-section="store-stock">Do‘kon qoldig‘ini tozalash</button>
+        </div>
+      </details>
+
+      <details class="panel collapsible-panel">
+        <summary>Ombordan do‘konga tovar o‘tkazish</summary>
+        <form class="transaction-form" id="transferForm">
+          <label>Tovar
+            <select id="transferProductInput" required><option value="">Tovarni tanlang</option></select>
+          </label>
+          <label>Miqdor<input id="transferQuantityInput" type="number" min="1" step="1" required></label>
+          <button class="primary-button" type="submit">Do‘konga o‘tkazish</button>
+        </form>
+      </details>
+
+      <details class="panel collapsible-panel">
+        <summary>Sotuvlar tarixi</summary>
+        <ul class="product-list" id="salesHistoryList"></ul>
+        <div class="panel-export-actions">
+          <button class="secondary-button" type="button" data-export-section="sales-history" data-export-format="excel">Excel</button>
+          <button class="secondary-button" type="button" data-export-section="sales-history" data-export-format="word">Word</button>
+          <button class="clear-button" type="button" data-clear-section="sales">Tarixni tozalash</button>
+        </div>
+      </details>
+    </section>
+
+    <section class="settings-page" id="warehousePage" hidden>
+      <header class="page-header"><p class="eyebrow">OMBOR</p><h2>Tovarlar</h2></header>
+      <section class="summary">
+        <article class="summary-card"><p>Tovar turi</p><strong id="productCount">0 ta</strong></article>
+        <article class="summary-card"><p>Ombordagi jami miqdor</p><strong id="warehouseQuantityCount">0 dona</strong></article>
+        <article class="summary-card"><p>Ombor qiymati (tannarx)</p><strong id="warehouseValueCount">0 so‘m</strong></article>
+      </section>
+      <section class="panel">
+        <h3>Yangi tovar qo‘shish</h3>
+        <form class="product-form" id="productForm">
+          <label>Tovar nomi<input id="productNameInput" required></label>
+          <label>Kategoriya<input id="productCategoryInput" placeholder="Ixtiyoriy"></label>
+          <label>Rusumi<input id="productModelInput"></label>
+          <label>Shtrix-kod<input id="productBarcodeInput" inputmode="numeric"></label>
+          <label>Rangi<input id="productColorInput"></label>
+          <label>O‘lchami<input id="productSizeInput"></label>
+          <label>Miqdori<input id="productQuantityInput" type="number" min="1" step="1" required></label>
+          <label>Sotuv narxi (so‘m)<input id="productPriceInput" type="number" min="0" step="1" required></label>
+          <label>Tannarx (so‘m)<input id="productCostPriceInput" type="number" min="0" step="1" required></label>
+          <button class="primary-button" type="submit">Tovarni saqlash</button>
+        </form>
+      </section>
+      <section class="panel">
+        <div class="section-heading"><h3>Ombordagi tovarlar</h3></div>
+        <p class="warehouse-count">Kam qolgan chegara: <strong id="currentStockThreshold">5 dona</strong></p>
+        <label class="inventory-search">Qidirish
+          <input id="warehouseSearchInput" list="warehouseSearchSuggestions" type="search" placeholder="Nomi, rusumi yoki shtrix-kod">
+          <datalist id="warehouseSearchSuggestions"></datalist>
+        </label>
+        <ul class="product-list" id="warehouseProductsList"></ul>
+        <div class="panel-export-actions">
+          <button class="secondary-button" type="button" data-export-section="warehouse-stock" data-export-format="excel">Excel</button>
+          <button class="secondary-button" type="button" data-export-section="warehouse-stock" data-export-format="word">Word</button>
+          <button class="clear-button" type="button" data-clear-section="products">Barcha tovarlarni o‘chirish</button>
+        </div>
+      </section>
+    </section>
+
+    <section class="settings-page" id="dashboardPage" hidden>
+      <header class="page-header dashboard-header">
+        <div><p class="eyebrow">UMUMIY KO‘RINISH</p><h2>Bosh sahifa</h2></div>
+        <div class="datetime-card"><strong id="dashboardTime">Do‘kon ko‘rsatkichlari</strong><span>Bugungi savdo va holat</span></div>
+      </header>
+      <section class="summary dashboard-summary">
+        <article class="summary-card sales-card"><p>Bugungi savdo</p><strong id="todaySalesTotal">0 so‘m</strong></article>
+        <article class="summary-card expense-card"><p>Bugungi xarajat</p><strong id="todayExpensesTotal">0 so‘m</strong></article>
+        <article class="summary-card profit-card"><p>Foyda / zarar</p><strong class="profit-loss-value" id="profitLossValue">Foyda: 0 so‘m</strong></article>
+        <article class="summary-card credit-card"><p>To‘lanmagan qarz</p><strong id="outstandingDebtTotal">0 so‘m</strong><span class="summary-detail" id="outstandingDebtCount">0 ta qarz</span></article>
+        <article class="summary-card"><p>Tovar turlari</p><strong id="productCountDashboard">Ombor bo‘limida</strong></article>
+      </section>
+      <section class="panel" id="statisticsReport">
+        <div class="section-heading"><h3>Hisobot</h3><label class="report-period-control">Davr
+          <select id="reportPeriodInput"><option value="day">Bugun</option><option value="month">Shu oy</option></select>
+        </label></div>
+        <p class="report-period-label" id="reportPeriodLabel"></p>
+        <div class="report-grid">
+          <article class="report-card"><span>Jami savdo</span><strong id="reportSalesTotal">0 so‘m</strong></article>
+          <article class="report-card"><span>Naqd</span><strong id="reportCashTotal">0 so‘m</strong></article>
+          <article class="report-card"><span>Karta</span><strong id="reportCardTotal">0 so‘m</strong></article>
+          <article class="report-card"><span>Nasiya</span><strong id="reportCreditTotal">0 so‘m</strong></article>
+          <article class="report-card"><span>Qarz to‘lovlari</span><strong id="reportDebtPaymentsTotal">0 so‘m</strong></article>
+          <article class="report-card"><span>Xarajatlar</span><strong id="reportExpensesTotal">0 so‘m</strong></article>
+          <article class="report-card report-net"><span>Sof tushum (savdo − xarajat)</span><strong id="reportNetTotal">0 so‘m</strong></article>
+        </div>
+        <div class="page-export-actions">
+          <button class="secondary-button" type="button" data-export-section="dashboard" data-export-format="excel">Hisobotni Excel qilish</button>
+          <button class="secondary-button" type="button" data-export-section="dashboard" data-export-format="word">Hisobotni Word qilish</button>
+        </div>
+      </section>
+      <section class="panel"><div class="section-heading"><h3>Yaqinda qo‘shilgan tovarlar</h3><button class="secondary-button" type="button" data-export-section="recent-products" data-export-format="excel">Excel</button></div><ul class="product-list" id="recentProductsList"></ul></section>
+    </section>
+
+    <section class="settings-page" id="debtsPage" hidden>
+      <header class="page-header"><p class="eyebrow">MIJOZLAR</p><h2>Qarzlar va nasiyalar</h2></header>
+      <section class="summary">
+        <article class="summary-card credit-card"><p>Qolgan qarzlar</p><strong id="outstandingDebtTotalPage">Ro‘yxatda ko‘rsatiladi</strong><span class="summary-detail" id="outstandingDebtCountPage"></span></article>
+      </section>
+      <section class="panel">
+        <h3>Qarz qo‘shish</h3>
+        <form class="debt-form" id="debtForm">
+          <label>Mijoz ismi<input id="debtNameInput" required></label>
+          <label>Telefon raqami<input id="debtPhoneInput" type="tel" required></label>
+          <label>Qarz miqdori (so‘m)<input id="debtAmountInput" inputmode="numeric" required><span class="formatted-price" id="debtAmountFormatted">Ko‘rinishi: 0 so‘m</span></label>
+          <label>Qaytarish muddati<input id="debtPeriodInput" type="number" min="1" step="1" required></label>
+          <label>Muddat birligi<select id="debtPeriodUnit"><option value="days">Kun</option><option value="months">Oy</option></select></label>
+          <p class="repayment-date-preview" id="debtDueDatePreview">Qaytarish sanasi: —</p>
+          <button class="primary-button" type="submit">Qarz saqlash</button>
+        </form>
+      </section>
+      <section class="panel">
+        <div class="section-heading"><h3>Qarzlar ro‘yxati</h3><button class="clear-button" type="button" data-clear-section="debts">Qarzlarni tozalash</button></div>
+        <div class="debt-filters">
+          <label>Qidirish<input id="debtSearchInput" type="search" placeholder="Mijoz yoki telefon"></label>
+          <label class="debt-overdue-filter"><input id="overdueDebtsOnlyInput" type="checkbox"> Muddati o‘tganlar</label>
+        </div>
+        <ul class="product-list" id="debtsList"></ul>
+      </section>
+    </section>
+
+    <section class="settings-page" id="expensesPage" hidden>
+      <header class="page-header"><p class="eyebrow">XARAJATLAR</p><h2>Xarajatlar</h2></header>
+      <section class="panel"><h3>Xarajat qo‘shish</h3>
+        <form class="expense-form" id="expenseForm">
+          <label>Nima uchun<input id="expenseReasonInput" required></label>
+          <label>Miqdori (so‘m)<input id="expenseAmountInput" inputmode="numeric" required><span class="formatted-price" id="expenseAmountFormatted">Ko‘rinishi: 0 so‘m</span></label>
+          <label>Qayerga sarflandi<input id="expensePlaceInput" required></label>
+          <button class="primary-button" type="submit">Xarajatni saqlash</button>
+        </form>
+      </section>
+      <section class="panel"><div class="section-heading"><h3>Xarajatlar tarixi</h3><button class="clear-button" type="button" data-clear-section="expenses">Tarixni tozalash</button></div><ul class="product-list" id="expensesList"></ul>
+        <div class="panel-export-actions"><button class="secondary-button" type="button" data-export-section="expense-history" data-export-format="excel">Excel</button><button class="secondary-button" type="button" data-export-section="expense-history" data-export-format="word">Word</button></div>
+      </section>
+    </section>
+
+    <section class="settings-page" id="settingsPage" hidden>
+      <header class="page-header"><p class="eyebrow">BOSHQARUV</p><h2>Sozlamalar</h2></header>
+      <section class="panel settings-card">
+        <div class="settings-card-copy"><h3>Do‘kon ma’lumotlari</h3><p>Do‘kon nomi va chekda ko‘rinadigan stikerni sozlang.</p><p class="settings-current">Joriy nom: <strong id="settingsShopName">Mening do‘konim</strong></p></div>
+        <button class="primary-button" id="editShopNameButton" type="button">Do‘kon nomini o‘zgartirish</button>
+        <form class="settings-form" id="settingsForm" hidden>
+          <label>Do‘kon nomi<input id="shopNameInput" required></label>
+          <label>Chek stikeri / belgisi<input id="shopStickerInput" maxlength="12" placeholder="Masalan: ★"></label>
+          <div class="dialog-actions"><button class="secondary-button" id="cancelSettings" type="button">Bekor qilish</button><button class="primary-button" type="submit">Saqlash</button></div>
+        </form>
+      </section>
+      <section class="panel settings-card">
+        <div class="settings-card-copy"><h3>Kam qolgan tovar ogohlantirishi</h3><p>Qoldiq belgilangan songa teng yoki undan kam bo‘lsa ogohlantirish ko‘rsatiladi.</p></div>
+        <button class="secondary-button" id="editLowStockButton" type="button">Chegarani o‘zgartirish</button>
+        <form class="settings-form" id="lowStockForm" hidden>
+          <label>Chegara (dona)<input id="lowStockThresholdInput" type="number" min="0" step="1" required></label>
+          <div class="dialog-actions"><button class="secondary-button" id="cancelLowStock" type="button">Bekor qilish</button><button class="primary-button" type="submit">Saqlash</button></div>
+        </form>
+      </section>
+      <div class="settings-tools">
+        <section class="panel"><h3>Ko‘rinish</h3>
+          <label class="appearance-control">Fon rangi<select id="backgroundColorInput"><option value="lavender">Lavanda</option><option value="blue">Ko‘k</option><option value="mint">Yalpiz</option><option value="peach">Shaftoli</option><option value="rose">Pushti</option></select></label>
+          <label class="dark-mode-control"><input id="darkModeInput" type="checkbox"> Qorong‘i rejim</label>
+        </section>
+        <section class="panel"><h3>Zaxira nusxasi</h3><p>Ma’lumotlarni faylga saqlang yoki avvalgi zaxiradan tiklang.</p>
+          <div class="settings-actions"><button class="primary-button" id="exportDataButton" type="button">Zaxira yuklab olish</button><label class="secondary-button import-button" for="importDataInput">Zaxiradan tiklash</label><input id="importDataInput" type="file" accept="application/json,.json" hidden></div>
+        </section>
+      </div>
+      <aside class="backup-reminder" id="backupReminder" hidden><div><strong>Zaxira nusxasi</strong><p id="backupReminderText"></p></div><button class="secondary-button" id="backupReminderButton" type="button">Sozlamalarga o‘tish</button></aside>
+      <div class="page-export-actions"><button class="secondary-button" type="button" data-export-section="debts" data-export-format="excel">Qarzlar Excel</button><button class="secondary-button" type="button" data-export-section="debts" data-export-format="word">Qarzlar Word</button></div>
+    </section>
+  </main>
+
+  <dialog class="receipt-dialog" id="receiptDialog" aria-label="Sotuv cheki">
+    <article class="receipt" id="receiptContent">
+      <header class="receipt-header"><p class="receipt-mark" id="receiptSticker"></p><p class="receipt-kicker">XARID CHEKI</p><h2 id="receiptShopName"></h2><p class="receipt-meta" id="receiptDate"></p><p class="receipt-number" id="receiptNumber"></p></header>
+      <h3>Xaridlar</h3>
+      <div class="table-wrap"><table class="receipt-table"><thead><tr><th>Tovar</th><th>Miqdor</th><th>Jami</th></tr></thead><tbody id="receiptItems"></tbody></table></div>
+      <p class="receipt-total" id="receiptTotal"></p><p class="receipt-payment" id="receiptPayment"></p><p class="receipt-thanks">Xaridingiz uchun rahmat!</p>
+      <div class="receipt-actions"><button class="secondary-button" id="closeReceiptButton" type="button">Yopish</button><button class="primary-button" id="printReceiptButton" type="button">Chekni chop etish</button></div>
+    </article>
+  </dialog>
+</body>
+</html>
